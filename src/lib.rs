@@ -26,8 +26,8 @@ pub fn scrypt(
     len: Option<usize>,
 ) -> Result<String, String> {
     let salt = match salt {
-        Some(salt) => SaltString::b64_encode(salt.as_bytes()).map_err(|e| format!("{}", e))?,
-        None => SaltString::generate(&mut OsRng),
+        Some(salt) => SaltString::new(&salt).map_err(|e| format!("{}", e))?,
+        None => SaltString::new("").map_err(|e| format!("{}", e))?,
     };
 
     let password_bytes = password.as_bytes();
