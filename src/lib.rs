@@ -1,4 +1,5 @@
 use ext_php_rs::prelude::*;
+use ext_php_rs::binary::Binary;
 
 /// Creates a scrypt password hash.
 ///
@@ -13,7 +14,7 @@ use ext_php_rs::prelude::*;
 #[php_function]
 pub fn scrypt(
     password: &str,
-    salt: &str,
+    salt: Binary<u8>,
     n: Option<u32>,
     r: Option<u32>,
     p: Option<u32>,
@@ -42,7 +43,7 @@ pub fn scrypt(
 
     match scrypt::scrypt(
         password_bytes,
-        salt.as_bytes(),
+        &salt,
         &params,
         &mut password_hash,
     ) {
@@ -65,39 +66,4 @@ pub fn scrypt(
 #[php_module]
 pub fn module(module: ModuleBuilder) -> ModuleBuilder {
     module
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_scrypt_without_salt() {
-        let hash = scrypt("hunter42", "test", None, None, None, None).unwrap();
-
-        println!("{:?}", hash);
-
-        // assert!(Scrypt.verify_password(b"hunter42", &parsed_hash).is_ok());
-    }
-
-    #[test]
-    fn test_scrypt_with_salt() {
-        let _hash = scrypt("hunter42", "salt", None, None, None, None).unwrap();
-
-        // assert!(Scrypt.verify_password(b"hunter42", &parsed_hash).is_ok());
-    }
-
-    #[test]
-    fn test_scrypt_with_custom_params() {
-        let hash = scrypt("some-scrypt-password", "some-salt", Some(16384), Some(12), Some(2), Some(64)).unwrap();
-
-        println!("{:?}", hash);
-
-        // assert!(Scrypt.verify_password(b"hunter42", &parsed_hash).is_ok());
-    }
-
-    #[test]
-    fn test_scrypt_with_invalid_params() {
-        assert!(scrypt("hunter42", "test", Some(0), Some(0), Some(0), Some(0)).is_err());
-    }
 }
