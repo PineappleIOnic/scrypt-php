@@ -22,21 +22,14 @@ pub fn scrypt(
 ) -> Result<String, String> {
     let password_bytes = password.as_bytes();
 
-    let params = scrypt::Params::new(
-        match n {
-            Some(data) => fast_math::log2(data as f32) as u8,
-            None => 15, // 32768
-        },
-        match r {
-            Some(data) => data,
-            None => 8,
-        },
-        match p {
-            Some(data) => data,
-            None => 1,
-        },
-    )
-    .map_err(|e| format!("{}", e))?;
+    let n = match n {
+        Some(data) => fast_math::log2(data as f32) as u8,
+        None => 15, // 32768
+    };
+    let r = r.unwrap_or(8);
+    let p = p.unwrap_or(1);
+
+    let params = scrypt::Params::new(n, r, p).map_err(|e| format!("{}", e))?;
 
     let len = match len {
         Some(data) => data,
