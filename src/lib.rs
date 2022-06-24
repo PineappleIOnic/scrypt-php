@@ -4,10 +4,10 @@ use ext_php_rs::binary::Binary;
 /// Creates a scrypt password hash.
 ///
 /// @param string password The clear text password
-/// @param string salt     The salt to use, or null to generate a random one
-/// @param u8     n        The CPU difficultly [default=15]
-/// @param u32    r        The memory difficultly [default=8]
-/// @param u32    p        The parallel difficultly [default=1]
+/// @param string salt     The salt to use for the hash
+/// @param u8     n        The CPU difficulty [default=32768]
+/// @param u32    r        The memory difficulty [default=8]
+/// @param u32    p        The parallel difficulty [default=1]
 /// @param u23    len      The length of the generated hash [default=8]
 ///
 /// @return string The hashed password
@@ -25,7 +25,7 @@ pub fn scrypt(
     let params = scrypt::Params::new(
         match n {
             Some(data) => fast_math::log2(data as f32) as u8,
-            None => 15,
+            None => 15, // 32768
         },
         match r {
             Some(data) => data,
@@ -50,14 +50,6 @@ pub fn scrypt(
         Ok(_) => (),
         Err(e) => return Err(format!("{}", e)),
     }
-
-    // let parsed_hash = match PasswordHash::new(&password_hash) {
-    //     Ok(data) => data,
-    //     Err(err) => {
-    //         return Err(err.to_string());
-    //     }
-    // };
-    // assert!(Scrypt.verify_password(password_bytes, &parsed_hash).is_ok());
 
     return Ok(hex::encode(password_hash));
 }
