@@ -1,9 +1,4 @@
 use ext_php_rs::prelude::*;
-use scrypt::{
-    password_hash::{
-        SaltString
-    }
-};
 
 /// Creates a scrypt password hash.
 ///
@@ -24,8 +19,6 @@ pub fn scrypt(
     p: Option<u32>,
     len: Option<usize>,
 ) -> Result<String, String> {
-    let salt = SaltString::new(&salt).map_err(|e| format!("{}", e))?;
-
     let password_bytes = password.as_bytes();
 
     let params = scrypt::Params::new(
