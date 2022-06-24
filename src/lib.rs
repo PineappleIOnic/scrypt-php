@@ -1,5 +1,5 @@
-use ext_php_rs::prelude::*;
 use ext_php_rs::binary::Binary;
+use ext_php_rs::prelude::*;
 
 /// Creates a scrypt password hash.
 ///
@@ -35,18 +35,18 @@ pub fn scrypt(
             Some(data) => data,
             None => 1,
         },
-
     )
     .map_err(|e| format!("{}", e))?;
 
-    let mut password_hash: Vec<u8> = vec![0; match len { Some(data) => data, None => 8 }];
+    let mut password_hash: Vec<u8> = vec![
+        0;
+        match len {
+            Some(data) => data,
+            None => 8,
+        }
+    ];
 
-    match scrypt::scrypt(
-        password_bytes,
-        &salt,
-        &params,
-        &mut password_hash,
-    ) {
+    match scrypt::scrypt(password_bytes, &salt, &params, &mut password_hash) {
         Ok(_) => (),
         Err(e) => return Err(format!("{}", e)),
     }
