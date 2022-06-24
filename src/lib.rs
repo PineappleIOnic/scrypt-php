@@ -9,7 +9,7 @@ use scrypt::{
 ///
 /// @param string password The clear text password
 /// @param string salt     The salt to use, or null to generate a random one
-/// @param u8     log_n    The CPU difficultly (must be a power of 2, > 1) [default=15]
+/// @param u8     n        The CPU difficultly [default=15]
 /// @param u32    r        The memory difficultly [default=8]
 /// @param u32    p        The parallel difficultly [default=1]
 /// @param u23    len      The length of the generated hash [default=8]
@@ -19,7 +19,7 @@ use scrypt::{
 pub fn scrypt(
     password: &str,
     salt: &str,
-    log_n: Option<u8>,
+    n: Option<u32>,
     r: Option<u32>,
     p: Option<u32>,
     len: Option<usize>,
@@ -29,8 +29,8 @@ pub fn scrypt(
     let password_bytes = password.as_bytes();
 
     let params = scrypt::Params::new(
-        match log_n {
-            Some(data) => data,
+        match n {
+            Some(data) => fast_math::log2(data as f32) as u8,
             None => 15,
         },
         match r {
@@ -96,7 +96,7 @@ mod tests {
 
     #[test]
     fn test_scrypt_with_custom_params() {
-        let hash = scrypt("appwrite", "appwrite2", Some(14), Some(13), Some(2), Some(64)).unwrap();
+        let hash = scrypt("some-scrypt-password", "some-salt", Some(16384), Some(12), Some(2), Some(64)).unwrap();
 
         println!("{:?}", hash);
 
