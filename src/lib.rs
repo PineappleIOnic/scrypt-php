@@ -38,13 +38,12 @@ pub fn scrypt(
     )
     .map_err(|e| format!("{}", e))?;
 
-    let mut password_hash: Vec<u8> = vec![
-        0;
-        match len {
-            Some(data) => data,
-            None => 8,
-        }
-    ];
+    let len = match len {
+        Some(data) => data,
+        None => 8,
+    };
+
+    let mut password_hash: Vec<u8> = vec![0; len];
 
     match scrypt::scrypt(password_bytes, &salt, &params, &mut password_hash) {
         Ok(_) => (),
