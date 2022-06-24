@@ -5,49 +5,49 @@ use ext_php_rs::prelude::*;
 ///
 /// @param string password The clear text password
 /// @param string salt     The salt to use for the hash
-/// @param u8     n        The CPU difficulty [default=32768]
-/// @param u32    r        The memory difficulty [default=8]
-/// @param u32    p        The parallel difficulty [default=1]
+/// @param u8     cpu_difficulty        The CPU difficulty [default=32768]
+/// @param u32    memory_difficulty        The memory difficulty [default=8]
+/// @param u32    parallel_difficulty        The parallel difficulty [default=1]
 /// @param u23    len      The length of the generated hash [default=8]
 ///
 /// @return string The hashed password
 #[php_function]
 pub fn scrypt(
-    password: &str,
-    salt: Binary<u8>,
-    n: Option<u32>,
-    r: Option<u32>,
-    p: Option<u32>,
-    len: Option<usize>,
+  password: &str,
+  salt: Binary<u8>,
+  cpu_difficulty: Option<u32>,
+  memory_difficulty: Option<u32>,
+  parallel_difficulty: Option<u32>,
+  len: Option<usize>,
 ) -> Result<String, String> {
-    let password_bytes = password.as_bytes();
+  let password = password.as_bytes();
 
-    let n = match n {
-        Some(data) => fast_math::log2(data as f32) as u8,
-        None => 15, // 32768
-    };
-    let r = r.unwrap_or(8);
-    let p = p.unwrap_or(1);
+  let n = match cpu_difficulty {
+    Some(data) => fast_math::log2(data as f32) as u8,
+    None => 15, // 32768
+  };
+  let r = memory_difficulty.unwrap_or(8);
+  let p = parallel_difficulty.unwrap_or(1);
 
-    let params = scrypt::Params::new(n, r, p).map_err(|e| format!("{}", e))?;
+  let params = scrypt::Params::new(n, r, p).map_err(|e| format!("{}", e))?;
 
-    let len = match len {
-        Some(data) => data,
-        None => 8,
-    };
+  let len = match len {
+    Some(data) => data,
+    None => 8,
+  };
 
-    let mut password_hash: Vec<u8> = vec![0; len];
+  let mut password_hash: Vec<u8> = vec![0; len];
 
-    match scrypt::scrypt(password_bytes, &salt, &params, &mut password_hash) {
-        Ok(_) => (),
-        Err(e) => return Err(format!("{}", e)),
-    }
+  match scrypt::scrypt(password, &salt, &params, &mut password_hash) {
+    Ok(_) => (),
+    Err(e) => return Err(format!("{}", e)),
+  }
 
-    return Ok(hex::encode(password_hash));
+  Ok(hex::encode(password_hash))
 }
 
 // Required to register the extension with PHP.
 #[php_module]
 pub fn module(module: ModuleBuilder) -> ModuleBuilder {
-    module
+  module
 }
